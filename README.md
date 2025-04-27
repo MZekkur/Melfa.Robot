@@ -6,25 +6,25 @@
 - In order to operate you must
 
 
-## The first thing
+The first thing
 ```python
 CD Melfa.Robot
 ```
-## The second matter
-``` pyhton
+The second matter
+```python
 python -m venv .venv
 ```
-## The third command, making sure to run the previous command and download the necessary files
+The third command, making sure to run the previous command and download the necessary files
 ```python
 .venv\Scripts\Activate
 ```
-## The fourth matter
+The fourth matter
 ```python
 pip install -r requirements.txt
 ```
-## The fifth matter
+The fifth matter
 ```python
 python app.py
 ```
 
-- To connect via Ethernet, you must change the connection settings and IP address from your own pc.
+## To connect via Ethernet, you must change the connection settings and IP address from your own pc.
