@@ -9,7 +9,7 @@ In order to operate you must
 
 
 The first thing
-CD Melfa.Robot
+´CD Melfa.Robot´
 
 The second matter
 python -m venv .venv
