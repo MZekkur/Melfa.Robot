@@ -2,8 +2,8 @@
 
 
 
-Melfa Robot web based interface\n
-In order to operate you must
+Melfa Robot web based interface
+-In order to operate you must
 
 
 The first thing
