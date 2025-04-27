@@ -3,7 +3,7 @@
 
 
 Melfa Robot web based interface
--In order to operate you must
+- In order to operate you must
 
 
 The first thing
