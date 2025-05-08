@@ -4,10 +4,13 @@ import cv2
 
 app = Flask(__name__)
 
-# ======== إعداد الروبوت ========
+# إعداد الروبوت
 robot = MelfaEthernetClient()
 
-# ======== الكاميرا ========
+# إنشاء كائن الروبوت
+robot = MelfaEthernetClient(ip='192.168.0.1', port=10001)  # غيّر IP و PORT حسب الروبوت
+
+# إعداد الكاميرا
 camera = cv2.VideoCapture(0)
 
 def gen_frames():
@@ -21,10 +24,25 @@ def gen_frames():
             yield (b'--frame\r\n'
                    b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
-# ======== صفحات الويب ========
 @app.route('/')
 def index():
     return render_template('index.html')
+
+@app.route('/command', methods=['POST'])
+def handle_command():
+    command = request.get_data(as_text=True)
+    try:
+        if not robot.is_connected():
+            connected = robot.connect()
+            if not connected:
+                return jsonify({'status': 'error', 'message': 'فشل الاتصال بالروبوت'})
+
+        response = robot.send_command(command)
+        return jsonify({'status': 'success', 'response': response})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)})
+
+
 
 @app.route('/video_feed')
 def video_feed():
@@ -45,8 +63,11 @@ def send():
 
 @app.route('/disconnect')
 def disconnect():
-    robot.close()
-    return redirect(url_for('index'))
+    try:
+        robot.close()
+        return jsonify({'status': 'disconnected'})
+    except Exception as e:
+        return jsonify({'error': str(e)})
 
 @app.route('/programs')
 def get_programs():
@@ -71,22 +92,16 @@ def melfa_exec():
             return jsonify({'error': str(e)})
     return jsonify({'error': 'No code provided'})
 
-@app.route('/coordinates', methods=['GET', 'POST'])
+@app.route('/coordinates', methods=['GET'])
 def coordinates():
     try:
         if not robot.sock:
             robot.connect()
-        if request.method == 'POST':
-            position = request.form.get('position')
-            value = request.form.get('value')
-            if position and value:
-                res = robot.send_command(f"1;1;VAL={position}={value}")
-                return jsonify({'response': res})
-        else:
-            res = robot.send_command("1;1;LISTPTOP")
-            return jsonify({'position': res})
+        res = robot.send_command("1;1;PPOS")
+        return jsonify({'coordinates': res})
     except Exception as e:
         return jsonify({'error': str(e)})
+
 
 @app.route('/read_robot', methods=['GET'])
 def read_robot():

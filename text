@@ -1,0 +1,17 @@
+melfa_robot_control/
+│
+├── app.py                     # سيرفر Flask الأساسي
+├── melfa_client.py             # عميل الاتصال مع الروبوت عبر Ethernet
+│
+├── templates/
+│   └── index.html              # واجهة الويب الرئيسية
+│
+├── static/
+│   ├── css/
+│   │   └── style.css           # تصميم مخصص للواجهة
+│   ├── js/
+│   │   └── main.js             # أكواد JavaScript للتحكم والتبديل بين اللغات وغيرها
+│   └── img/
+│       └── logo-placeholder.png  # صورة افتراضية لمكان الشعار
+│
+└── README.md                   # دليل استخدام المشروع
