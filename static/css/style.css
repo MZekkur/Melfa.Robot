@@ -1,0 +1,23 @@
+body.light-mode {
+    background-color: #f8f9fa;
+    color: #212529;
+}
+
+body.dark-mode {
+    background-color: #212529;
+    color: #f8f9fa;
+}
+
+.card {
+    border-radius: 15px;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+#status-indicator {
+    font-weight: bold;
+    padding: 5px 10px;
+}
