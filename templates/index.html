@@ -1,132 +1,310 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>Melfa Robot Control Panel</title>
+    <title>Melfa Robot Kontrol Paneli</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
-            padding-top: 20px;
-        }
-        .video-box {
-            border: 2px solid #ddd;
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        .response-box {
-            white-space: pre-wrap;
-            background: #f1f1f1;
-            padding: 10px;
-            height: 150px;
-            overflow-y: auto;
-            border-radius: 5px;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://kit.fontawesome.com/a2d9d6a05d.js" crossorigin="anonymous"></script>
 </head>
-<body>
+<body class="light-mode">
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4" style="height: 50px;">
+    <div class="container-fluid px-0 h-100"> <!-- إزالة الحشوة الجانبية -->
+        <img src="{{ url_for('static', filename='img/logo-placeholder.png') }}" style="width: 400px; height: 50px;" alt="Logo">
+        <span class="navbar-brand ms-2">MELFA Robot Control</span>
+        <div class="d-flex align-items-center">
+            <div id="status-indicator" class="badge bg-secondary me-3" data-i18n="not_connected">Bağlantı yok</div>
+            <span id="servo-indicator" class="badge bg-secondary ms-2">Servo: ?</span>
+            <span id="control-indicator" class="badge bg-secondary ms-2">Control: ?</span>
+            <span id="run-indicator" class="badge bg-secondary ms-2">RUN ?</span>
+            <select id="language-select" class="form-select form-select-sm me-3">
+                <option value="tr">Türkçe</option>
+                <option value="en">English</option>
+                <option value="ar">العربية</option>
+            </select>
+            <button id="theme-toggle" class="btn btn-outline-light btn-sm"><i class="fas fa-moon"></i></button>
+        </div>
+    </div>
+</nav>
+
 <div class="container">
-    <h2 class="mb-4 text-center">🔧 Melfa Robot Control Panel</h2>
-
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <div class="video-box">
-                <img src="{{ url_for('video_feed') }}" class="img-fluid">
+    <!-- الكاميرا + التحكم الرئيسي في صف واحد -->
+    <div class="row g-4 mt-4">
+        <!-- الكاميرا -->
+        <div class="col-lg-6">
+            <div class="card shadow" style="width: 100%; height: 550px;">
+                <div class="card-body">
+                    <h5 class="card-title" data-i18n="camera">📸 Kamera</h5>
+                    <img src="{{ url_for('video_feed') }}" class="img-fluid rounded" alt="Camera Feed">
+                </div>
             </div>
         </div>
-        <div class="col-md-6">
-            <div class="d-grid gap-2">
-                <button class="btn btn-success" onclick="sendCommand('1;1;OPEN=WEBCLIENT')">🔌 فتح الاتصال</button>
-                <button class="btn btn-danger" onclick="location.href='/disconnect'">❌ قطع الاتصال</button>
-                <button class="btn btn-primary" onclick="sendCommand('1;1;CNTLON')">✅ تمكين التشغيل</button>
-                <button class="btn btn-warning" onclick="sendCommand('1;1;SRVON')">⚙️ تشغيل السيرفو</button>
-                <button class="btn btn-info" onclick="sendCommand('1;1;RUN100')">▶️ تشغيل البرنامج</button>
-                <button class="btn btn-secondary" onclick="sendCommand('1;1;STOP')">⏹️ إيقاف</button>
-                <button class="btn btn-dark" onclick="sendCommand('1;1;HNDON1')">🤖 فتح اللاقط</button>
-                <button class="btn btn-dark" onclick="sendCommand('1;1;HNDOFF1')">🤖 إغلاق اللاقط</button>
-                <button class="btn btn-outline-secondary" onclick="sendCommand('1;1;JOG00;00;01;00;00')">⬅️ يسار</button>
-                <button class="btn btn-outline-secondary" onclick="sendCommand('1;1;JOG00;00;00;01;00')">➡️ يمين</button>
-                <button class="btn btn-outline-secondary" onclick="sendCommand('1;1;JOG00;00;04;00;00')">🔼 الرأس</button>
-                <button class="btn btn-outline-secondary" onclick="sendCommand('1;1;JOG00;00;08;00;00')">🔽 الجسم</button>
-                <button class="btn btn-warning" onclick="loadPrograms()">📂 تحميل البرامج</button>
-                <button class="btn btn-outline-info" onclick="readStatus()">📡 قراءة حالة الروبوت</button>
+
+        <!-- التحكم الرئيسي -->
+        <div class="col-lg-3">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h5 class="card-title" data-i18n="controls">Kontroller</h5>
+                    <div class="d-grid gap-3">
+                        <button class="btn btn-success" onclick="connectRobot()" data-i18n="connect">Bağlantı Aç</button>
+                        <button class="btn btn-danger" onclick="disconnectRobot()" data-i18n="disconnect">Bağlantı Kapat</button>
+                        <button class="btn btn-success" onclick="sendCommand('1;1;CNTLON')" data-i18n="controller_on">Controller ON</button>
+                        <button class="btn btn-danger" onclick="sendCntlOff()">🔌 CNTLOFF</button>
+                        <button class="btn btn-success" onclick="sendCommand('1;1;SRVON')" data-i18n="servo_on">Servo ON</button>
+                        <button class="btn btn-danger" onclick="sendCommand('1;1;SRVOFF')" data-i18n="servo_off">Servo OFF</button>
+                        <button class="btn btn-secondary" onclick="resetRobot()" data-i18n="reset">Reset</button>
+                        <button class="btn btn-warning" onclick="sendCommand('1;1;STOP')" data-i18n="stop">Durdur</button>
+                        <button class="btn btn-dark" onclick="emergencyStop()" data-i18n="emergency_stop">Acil Dur</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+         <!-- عرض الردود من الروبوت 📥 -->
+        
+        <div class="col g-4 mt-4">
+            <div class="col-lg-12">
+                <div class="card shadow" style="width: 100%; height: 550px;">
+                    <div class="card-body">
+                        <h5 class="card-title" data-i18n="robot_response">📥 Robot Yanıtı:</h5>
+                        <pre id="robot-response" class="border rounded p-1 bg-light" style="height: 350px; overflow-y: auto; white-space: pre-wrap; word-wrap: break-word;"></pre>
+                         <div class="d-flex gap-2 mt-3 flex-wrap">
+                        <button class="btn btn-outline-danger btn-sm" onclick="readLastError()">📋 قراءة الخطأ (ERROR)</button>
+                        <button class="btn btn-outline-info btn-sm" onclick="sendErrorMessage()">📩 إرسال رسالة الخطأ (ERRORMES)</button>
+                        </div>
+                    </div>
+                   
+                </div>
+            </div>
+        </div>    
+    
+    </div>
+
+
+    <!-- كرت إدارة البرامج -->
+    <div class="row g-4 mt-4">
+    <div class="col-lg-12">
+        <div class="card shadow">
+        <div class="card-body">
+            <h5 class="card-title" data-i18n="program_manager">🗂️ إدارة البرامج</h5>
+
+            <!-- أزرار تحميل واستدعاء البرامج -->
+            <div class="d-flex flex-wrap gap-2 mb-3 align-items-center">
+             <!-- زر PRGRD -->
+            <button class="btn btn-outline-dark btn-sm" onclick="fetchPrograms('PRGRD')">
+                📖 PRGRD - قراءة البرنامج
+            </button>
+                <!-- زر استدعاء البرامج -->
+            <button class="btn btn-outline-primary btn-sm" onclick="fetchPrograms('PRGUP')">
+                📂 PRGUP - انظر للبرامج
+            </button>
+
+            <!-- إدخال رقم البرنامج وتحميل -->
+            <div class="input-group" style="max-width: 300px;">
+                <input type="text" class="form-control form-control-sm" id="load-program-id" placeholder="مثال: 333">
+                <button class="btn btn-outline-secondary btn-sm" onclick="fetchPrograms('LOAD')">
+                📥 PRGLOAD - تحميل برنامج
+                </button>
+            </div>
+
+            <!-- زر SLOTINIT -->
+            <button class="btn btn-outline-warning btn-sm" onclick="fetchPrograms('SLOTINIT')">
+                🔧 SLOTINIT - تهيئة البرنامج
+            </button>
+
+          
+            </div>
+
+            <!-- قائمة البرامج -->
+            <label class="form-label" data-i18n="available_programs">📃 البرامج المتوفرة:</label>
+            <textarea class="form-control mb-3" id="program-list" rows="2" readonly style="white-space: pre-wrap;"></textarea>
+
+            <!-- تشغيل البرنامج -->
+            <label class="form-label" data-i18n="run_program_name">📝 أدخل اسم البرنامج لتشغيله:</label>
+            <div class="input-group">
+            <input type="text" class="form-control" id="program-name" placeholder="مثال: test">
+            <button class="btn btn-success" onclick="runProgram()" data-i18n="run">تشغيل</button>
+            <button class="btn btn-warning" onclick="sendCommand('1;1;STOP')" data-i18n="stop">Durdur</button>
+            <!-- زر إعادة تعيين البرنامج -->
+            <button class="btn btn-danger" onclick="resetProgram()">🗑️ إعادة تعيين البرنامج </button>
+            <button class="btn btn-secondary" onclick="resetRobot()" data-i18n="reset">Reset</button>
+            </div>
+
+        </div>
+        </div>
+    </div>
+    </div>
+
+    <!-- كرت إنشاء برنامج جديد -->
+    <div class="row g-4 mt-4">
+    <div class="col-lg-12">
+        <div class="card shadow">
+        <div class="card-body">
+            <h5 class="card-title">🛠️ إنشاء برنامج MELFA</h5>
+            <label class="form-label">اسم البرنامج:</label>
+
+            <div class="input-group">
+            <input type="text" id="new-program-name" class="form-control" placeholder="مثال: program1">
+            <button class="btn btn-outline-success" onclick="createNewProgram()">📄 LOAD</button>
+            <button class="btn btn-outline-primary" onclick="listProgramSlots()">📜 List Slots (LISTL)</button>
+            <!-- زر حفظ البرنامج -->
+            <button class="btn btn-outline-success" onclick="saveProgram()">💾 حفظ البرنامج (SAVE)</button>
+            <button class="btn btn-outline-info" onclick="sendListP('-1')">📜 LISTP - السابق</button>
+            <button class="btn btn-outline-info" onclick="sendListP('+1')">📜 LISTP + التالي</button>
+            </div>
+            <div class="mb-3">
+            <!-- مربع عرض الردود الخاصة بالكرت -->
+            <pre id="melfa-create-response" class="border rounded p-2 bg-light mt-3" style="white-space: pre-wrap; overflow-y: auto; height: 200px;"></pre>
+            </div>
+        </div>
+        </div>
+    </div>
+    </div>
+
+
+    <!-- مربع كتابة أكواد MELFA BASIC -->
+    <div class="row g-4 mt-4">
+        <div class="col-lg-8"> 
+            <div class="card shadow">
+                <div class="card-body">
+                    <h5 class="card-title" data-i18n="melfa_editor">✍️ MELFA BASIC IV Editörü</h5>
+                    <textarea id="melfa-code" class="form-control" rows="4" placeholder="......."></textarea>
+                    <button class="btn btn-primary mt-3" onclick="sendMelfaCode()">Kod yürütme</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- اختيار السرعة -->
+        <div class="col-lg-4">
+            <div class="col-lg-12">
+                <div class="card shadow">
+                    <div class="card-body">
+                        <h5 class="card-title" data-i18n="speed_select">Hız Seçimi </h5>
+                        <select id="speed-select" class="form-select">
+                            <option value="10" data-i18n="speed_slow_10">Çok Yavaş (10%)</option>
+                            <option value="20" data-i18n="speed_slow_20">Yavaş Hareket (20%)</option>
+                            <option value="50" data-i18n="speed_medium_50">Orta Hız (50%)</option>
+                            <option value="75" data-i18n="speed_medium_75">Hızlı Tepki(75%)</option>
+                            <option value="100" data-i18n="speed_fast_100">Maksimum Hız (100%)</option>
+                        </select>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+    <!-- أزرار الحركة -->
+      <div class="row g-4 mt-6">
+        <div class="col-lg-8"> 
+            <div class="card shadow">
+                <div class="card-body">
+                    <div class="row g-5 text-center mt-8">
+                        <h5 class="card-title mb-2" data-i18n="movement">Hareket Kontrolü / Movement Control</h5>
 
-    <h5 class="mt-4">✍️ كتابة أوامر MELFA BASIC IV:</h5>
-    <form id="melfaForm" class="mb-3">
-        <textarea class="form-control" rows="3" name="melfa_code" placeholder="مثال: MOV P1"></textarea>
-        <button class="btn btn-outline-primary mt-2" type="submit">🚀 تنفيذ</button>
-    </form>
-
-    <h5>📌 الإحداثيات:</h5>
-    <form id="coordForm" class="row g-2">
-        <div class="col-md-4">
-            <input type="text" class="form-control" name="position" placeholder="اسم المتغير مثل P1">
+                        <div class="col-4">
+                            <button class="btn btn-outline-primary move-btn" onmousedown="startMove('JOG00;00;01;00;00')" onmouseup="stopMove()" onmouseleave="stopMove()">➡️ Sağ</button>
+                        </div>
+                        <div class="col-4">
+                            <button class="btn btn-outline-primary move-btn" onmousedown="startMove('JOG00;00;02;00;00')" onmouseup="stopMove()" onmouseleave="stopMove()">🔼 Yukarı</button>
+                        </div>
+                        <div class="col-4">
+                            <button class="btn btn-outline-primary move-btn" onmousedown="startMove('JOG00;00;00;01;00')" onmouseup="stopMove()" onmouseleave="stopMove()">⬅️ Sol</button>
+                        </div>
+                        <div class="col-4">
+                            <button class="btn btn-outline-primary move-btn" onmousedown="startMove('JOG00;00;04;00;00')" onmouseup="stopMove()" onmouseleave="stopMove()">⬆️ Geri</button>
+                        </div>
+                        <div class="col-4">
+                            <button class="btn btn-outline-success move-btn" onmousedown="startMove('JOG00;00;00;02;00')" onmouseup="stopMove()" onmouseleave="stopMove()">🔽 Aşağı</button>
+                        </div>
+                        <div class="col-4">
+                            <button class="btn btn-outline-success move-btn" onmousedown="startMove('JOG00;00;00;04;00')" onmouseup="stopMove()" onmouseleave="stopMove()">⬇️ İleri</button>
+                        </div>
+                        <div class="col-4">
+                            <button class="btn btn-outline-warning move-btn" onmousedown="startMove('JOG00;00;10;00;00')" onmouseup="stopMove()" onmouseleave="stopMove()">🔼 Baş Yukarı</button>
+                        </div>
+                        <div class="col-4">
+                            <button class="btn btn-outline-warning move-btn" onmousedown="startMove('JOG00;00;00;10;00')" onmouseup="stopMove()" onmouseleave="stopMove()">🔽 Baş  Aşağı</button>
+                        </div>
+                        <div class="col-4">
+                            <button class="btn btn-outline-warning move-btn" onmousedown="startMove('JOG00;00;00;20;00')" onmouseup="stopMove()" onmouseleave="stopMove()">↻ Baş Sağ</button>
+                        </div>
+                        <div class="col-4">
+                            <button class="btn btn-outline-warning move-btn" onmousedown="startMove('JOG00;00;20;00;00')" onmouseup="stopMove()" onmouseleave="stopMove()">↺ Baş Sol</button>
+                        </div>
+                        <div class="col-4">
+                            <button class="btn btn-outline-danger move-btn" onmousedown="startMove('HNDON1')" onmouseup="stopMove()" onmouseleave="stopMove()">🤖 Aç Kıskaç</button>
+                        </div>
+                        <div class="col-4">
+                            <button class="btn btn-outline-danger move-btn" onmousedown="startMove('HNDOFF1')" onmouseup="stopMove()" onmouseleave="stopMove()">🤖 Kapat Kıskaç</button>
+                        </div>
+                    </div>
+             </div> 
         </div>
-        <div class="col-md-4">
-            <input type="text" class="form-control" name="value" placeholder="(+100.00,+0.00,+500.00,+180,+0,+180)">
-        </div>
-        <div class="col-md-4 d-grid">
-            <button type="submit" class="btn btn-outline-success">📝 تعديل</button>
-        </div>
-    </form>
-
-    <div class="mt-4">
-        <h5>📥 الرد من الروبوت:</h5>
-        <div id="robotResponse" class="response-box"></div>
     </div>
+    
+        <!-- عرض الإحداثيات 📌 -->
+    <div class="row g-4 mt-4">
+        <div class="col-lg-12">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h5 class="card-title" data-i18n="coordinates">📌 Koordinatlar:</h5>
+                    <div class="input-group">
+                        <button class="btn btn-outline-primary mb-3" onclick="readCoordinates()">📍 قراءة الإحداثيات</button>
+                        <button class="btn btn-outline-primary mb-3" onclick="sendListP('-1')">📜 LISTP - السابق</button>
+                        <button class="btn btn-outline-primary mb-3" onclick="sendListP('+1')">📜 LISTP + التالي</button>
+                        <pre id="coordinates-display" class="border rounded p-2 bg-light"></pre>
+
+                    </div>
+                    <div class="input-group">
+                        <input class="form-control" id="coord-waist" placeholder="X" type="number">
+                        <input class="form-control" id="coord-shoulder" placeholder="Y" type="number">
+                        <input class="form-control" id="coord-elbow" placeholder="Z" type="number">
+                        <input class="form-control" id="coord-pitch" placeholder="A" type="number">
+                        <input class="form-control" id="coord-roll" placeholder="B" type="number">
+                        <input class="form-control" id="coord-c" placeholder="c" type="number">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="d-flex gap-2 mb-4">
+            <div class="d-flex gap-2 mt-3">
+                    <button class="btn btn-success btn-lg px-4" onclick="sendMixedMove('ABS')">
+                        🚀 تحريك مطلق (PCOSIROP)
+                    </button>
+                    <button class="btn btn-warning btn-lg px-4" onclick="sendMixedMove('REL')">
+                        🎯 تحريك نسبي (JCOSIROP)
+                    </button>
+                    <button class="btn btn-outline-success" onclick="resetArmAlarm()">إعادة ضبط الإنذار</button>
+                </div>
+        </div>
+    </div>
+
+   <!-- كرت إرسال كود صغير واستقبال الرد -->
+    <div class="row g-4 mt-4">
+    <div class="col-lg-12">
+        <div class="card shadow">
+        <div class="card-body">
+            <h5 class="card-title">📤 إرسال كود صغير واستقبال الرد</h5>
+
+            <!-- إدخال الكود وزر الإرسال -->
+            <div class="input-group mb-3">
+            <input type="text" class="form-control" id="custom-code-input" placeholder="مثال: 1;1;STATE">
+            <button class="btn btn-primary" onclick="sendCustomCode()">إرسال</button>
+            </div>
+
+            <!-- عرض الرد -->
+            <label class="form-label">📥 الرد:</label>
+            <pre id="custom-code-response" class="form-control bg-light" style="height: 150px; overflow-y: auto;"></pre>
+        </div>
+        </div>
+    </div>
+    </div>
+
+
 </div>
 
-<script>
-    const form = document.getElementById('melfaForm');
-    const coordForm = document.getElementById('coordForm');
-    const responseBox = document.getElementById('robotResponse');
-
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const formData = new FormData(form);
-        const res = await fetch('/melfa_exec', {
-            method: 'POST',
-            body: formData
-        });
-        const data = await res.json();
-        responseBox.innerText = JSON.stringify(data, null, 2);
-    });
-
-    coordForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const formData = new FormData(coordForm);
-        const res = await fetch('/coordinates', {
-            method: 'POST',
-            body: formData
-        });
-        const data = await res.json();
-        responseBox.innerText = JSON.stringify(data, null, 2);
-    });
-
-    async function sendCommand(cmd) {
-        const formData = new FormData();
-        formData.append('command', cmd);
-        const res = await fetch('/send', {
-            method: 'POST',
-            body: formData
-        });
-        const data = await res.json();
-        responseBox.innerText = JSON.stringify(data, null, 2);
-    }
-
-    async function loadPrograms() {
-        const res = await fetch('/programs');
-        const data = await res.json();
-        responseBox.innerText = JSON.stringify(data, null, 2);
-    }
-
-    async function readStatus() {
-        const res = await fetch('/read_robot');
-        const data = await res.json();
-        responseBox.innerText = JSON.stringify(data, null, 2);
-    }
-</script>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>
 </html>
