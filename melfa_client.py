@@ -17,6 +17,8 @@ class MelfaEthernetClient:
             print(f"[خطأ الاتصال] {e}")
             return False
 
+# إعداد الرسائل 
+
     def send_command(self, command: str) -> str:
         try:
             if not self.sock:
@@ -24,9 +26,14 @@ class MelfaEthernetClient:
             full_command = command.strip() + '\n'
             self.sock.sendall(full_command.encode())
             response = self.sock.recv(4096).decode().strip()
+
+            # تنسيق الرد على شكل أسطر
+            response = response.replace('\r', '\n').replace(';', ';\n')
+
             return response
         except Exception as e:
             return f"[خطأ إرسال] {e}"
+
 
     def close(self):
         if self.sock:
@@ -57,7 +64,6 @@ class MelfaEthernetClient:
         return self.send_command("SRVOFF")
 
     def run_program(self, program_name):
-        self.send_command(f"PRGLOAD={program_name}")
         return self.send_command("RUN")
 
     def execute_melfa_code(self, code):
