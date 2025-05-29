@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>Melfa Robot Kontrol Paneli</title>
+    <title data-i18n="title">Melfa Robot Kontrol Paneli</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <script src="https://kit.fontawesome.com/a2d9d6a05d.js" crossorigin="anonymous"></script>
@@ -10,38 +10,38 @@
 <body class="light-mode">
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4" style="height: 50px;">
-    <div class="container-fluid px-0 h-100"> <!-- إزالة الحشوة الجانبية -->
+    <div class="container-fluid px-0 h-100">
         <img src="{{ url_for('static', filename='img/logo-placeholder.png') }}" style="width: 400px; height: 50px;" alt="Logo">
-        <span class="navbar-brand ms-2">MELFA Robot Control</span>
+        <span class="navbar-brand ms-2" data-i18n="header">MELFA Robot Control</span>
         <div class="d-flex align-items-center">
             <div id="status-indicator" class="badge bg-secondary me-3" data-i18n="not_connected">Bağlantı yok</div>
-            <span id="servo-indicator" class="badge bg-secondary ms-2">Servo: ?</span>
-            <span id="control-indicator" class="badge bg-secondary ms-2">Control: ?</span>
-            <span id="run-indicator" class="badge bg-secondary ms-2">RUN ?</span>
+            <span id="servo-indicator" class="badge bg-secondary ms-2" data-i18n="servo_status">Servo ?</span>
+            <span id="control-indicator" class="badge bg-secondary ms-2" data-i18n="control_status">Control ?</span>
+            <span id="run-indicator" class="badge bg-secondary ms-2" data-i18n="run_status">RUN ?</span>
             <select id="language-select" class="form-select form-select-sm me-3">
-                <option value="tr">Türkçe</option>
-                <option value="en">English</option>
-                <option value="ar">العربية</option>
+                <option value="tr" data-i18n="lang_tr">Türkçe</option>
+                <option value="en" data-i18n="lang_en">English</option>
+                <option value="ar" data-i18n="lang_ar">العربية</option>
             </select>
-            <button id="theme-toggle" class="btn btn-outline-light btn-sm"><i class="fas fa-moon"></i></button>
+            <button id="theme-toggle" class="btn btn-outline-light btn-sm" title="Tema Değiştir"><i class="fas fa-moon"></i></button>
         </div>
     </div>
 </nav>
 
 <div class="container">
-    <!-- الكاميرا + التحكم الرئيسي في صف واحد -->
+    <!-- CAMERA + MAIN CONTROLS -->
     <div class="row g-4 mt-4">
-        <!-- الكاميرا -->
+        <!-- CAMERA -->
         <div class="col-lg-6">
             <div class="card shadow" style="width: 100%; height: 550px;">
                 <div class="card-body">
-                    <h5 class="card-title" data-i18n="camera">📸 Kamera</h5>
+                    <h5 class="card-title" data-i18n="camera">Kamera</h5>
                     <img src="{{ url_for('video_feed') }}" class="img-fluid rounded" alt="Camera Feed">
                 </div>
             </div>
         </div>
 
-        <!-- التحكم الرئيسي -->
+        <!-- MAIN CONTROL -->
         <div class="col-lg-3">
             <div class="card shadow">
                 <div class="card-body">
@@ -49,10 +49,10 @@
                     <div class="d-grid gap-3">
                         <button class="btn btn-success" onclick="connectRobot()" data-i18n="connect">Bağlantı Aç</button>
                         <button class="btn btn-danger" onclick="disconnectRobot()" data-i18n="disconnect">Bağlantı Kapat</button>
-                        <button class="btn btn-success" onclick="sendCommand('1;1;CNTLON')" data-i18n="controller_on">Controller ON</button>
-                        <button class="btn btn-danger" onclick="sendCntlOff()">🔌 CNTLOFF</button>
-                        <button class="btn btn-success" onclick="sendCommand('1;1;SRVON')" data-i18n="servo_on">Servo ON</button>
-                        <button class="btn btn-danger" onclick="sendCommand('1;1;SRVOFF')" data-i18n="servo_off">Servo OFF</button>
+                        <button class="btn btn-success" onclick="sendCommand('1;1;CNTLON')" data-i18n="controller_on">Controller Aç</button>
+                        <button class="btn btn-danger" onclick="sendCntlOff()" data-i18n="controller_off">Controller Kapalı</button>
+                        <button class="btn btn-success" onclick="sendCommand('1;1;SRVON')" data-i18n="servo_on">Servo Aç</button>
+                        <button class="btn btn-danger" onclick="sendCommand('1;1;SRVOFF')" data-i18n="servo_off">Servo Kapalı</button>
                         <button class="btn btn-secondary" onclick="resetRobot()" data-i18n="reset">Reset</button>
                         <button class="btn btn-warning" onclick="sendCommand('1;1;STOP')" data-i18n="stop">Durdur</button>
                         <button class="btn btn-dark" onclick="emergencyStop()" data-i18n="emergency_stop">Acil Dur</button>
@@ -60,131 +60,100 @@
                 </div>
             </div>
         </div>
-         <!-- عرض الردود من الروبوت 📥 -->
-        
+
+        <!-- ROBOT RESPONSE -->
         <div class="col g-4 mt-4">
             <div class="col-lg-12">
                 <div class="card shadow" style="width: 100%; height: 550px;">
                     <div class="card-body">
-                        <h5 class="card-title" data-i18n="robot_response">📥 Robot Yanıtı:</h5>
+                        <h5 class="card-title" data-i18n="robot_response">Robot Yanıtı:</h5>
                         <pre id="robot-response" class="border rounded p-1 bg-light" style="height: 350px; overflow-y: auto; white-space: pre-wrap; word-wrap: break-word;"></pre>
-                         <div class="d-flex gap-2 mt-3 flex-wrap">
-                        <button class="btn btn-outline-danger btn-sm" onclick="readLastError()">📋 قراءة الخطأ (ERROR)</button>
-                        <button class="btn btn-outline-info btn-sm" onclick="sendErrorMessage()">📩 إرسال رسالة الخطأ (ERRORMES)</button>
+                        <div class="d-flex gap-2 mt-3 flex-wrap">
+                            <button class="btn btn-outline-danger btn-sm" onclick="readLastError()" data-i18n="read_error">Son Hata (ERROR)</button>
+                            <button class="btn btn-outline-info btn-sm" onclick="sendErrorMessage()" data-i18n="send_error_msg">Hata Mesajı Gönder (ERRORMES)</button>
                         </div>
                     </div>
-                   
                 </div>
             </div>
         </div>    
-    
     </div>
 
-
-    <!-- كرت إدارة البرامج -->
+    <!-- PROGRAM MANAGER -->
     <div class="row g-4 mt-4">
-    <div class="col-lg-12">
-        <div class="card shadow">
-        <div class="card-body">
-            <h5 class="card-title" data-i18n="program_manager">🗂️ إدارة البرامج</h5>
-
-            <!-- أزرار تحميل واستدعاء البرامج -->
-            <div class="d-flex flex-wrap gap-2 mb-3 align-items-center">
-             <!-- زر PRGRD -->
-            <button class="btn btn-outline-dark btn-sm" onclick="fetchPrograms('PRGRD')">
-                📖 PRGRD - قراءة البرنامج
-            </button>
-                <!-- زر استدعاء البرامج -->
-            <button class="btn btn-outline-primary btn-sm" onclick="fetchPrograms('PRGUP')">
-                📂 PRGUP - انظر للبرامج
-            </button>
-
-            <!-- إدخال رقم البرنامج وتحميل -->
-            <div class="input-group" style="max-width: 300px;">
-                <input type="text" class="form-control form-control-sm" id="load-program-id" placeholder="مثال: 333">
-                <button class="btn btn-outline-secondary btn-sm" onclick="fetchPrograms('LOAD')">
-                📥 PRGLOAD - تحميل برنامج
-                </button>
-            </div>
-
-            <!-- زر SLOTINIT -->
-            <button class="btn btn-outline-warning btn-sm" onclick="fetchPrograms('SLOTINIT')">
-                🔧 SLOTINIT - تهيئة البرنامج
-            </button>
-
-          
-            </div>
-
-            <!-- قائمة البرامج -->
-            <label class="form-label" data-i18n="available_programs">📃 البرامج المتوفرة:</label>
-            <textarea class="form-control mb-3" id="program-list" rows="2" readonly style="white-space: pre-wrap;"></textarea>
-
-            <!-- تشغيل البرنامج -->
-            <label class="form-label" data-i18n="run_program_name">📝 أدخل اسم البرنامج لتشغيله:</label>
-            <div class="input-group">
-            <input type="text" class="form-control" id="program-name" placeholder="مثال: test">
-            <button class="btn btn-success" onclick="runProgram()" data-i18n="run">تشغيل</button>
-            <button class="btn btn-warning" onclick="sendCommand('1;1;STOP')" data-i18n="stop">Durdur</button>
-            <!-- زر إعادة تعيين البرنامج -->
-            <button class="btn btn-danger" onclick="resetProgram()">🗑️ إعادة تعيين البرنامج </button>
-            <button class="btn btn-secondary" onclick="resetRobot()" data-i18n="reset">Reset</button>
-            </div>
-
-        </div>
-        </div>
-    </div>
-    </div>
-
-    <!-- كرت إنشاء برنامج جديد -->
-    <div class="row g-4 mt-4">
-    <div class="col-lg-12">
-        <div class="card shadow">
-        <div class="card-body">
-            <h5 class="card-title">🛠️ إنشاء برنامج MELFA</h5>
-            <label class="form-label">اسم البرنامج:</label>
-
-            <div class="input-group">
-            <input type="text" id="new-program-name" class="form-control" placeholder="مثال: program1">
-            <button class="btn btn-outline-success" onclick="createNewProgram()">📄 LOAD</button>
-            <button class="btn btn-outline-primary" onclick="listProgramSlots()">📜 List Slots (LISTL)</button>
-            <!-- زر حفظ البرنامج -->
-            <button class="btn btn-outline-success" onclick="saveProgram()">💾 حفظ البرنامج (SAVE)</button>
-            <button class="btn btn-outline-info" onclick="sendListP('-1')">📜 LISTP - السابق</button>
-            <button class="btn btn-outline-info" onclick="sendListP('+1')">📜 LISTP + التالي</button>
-            </div>
-            <div class="mb-3">
-            <!-- مربع عرض الردود الخاصة بالكرت -->
-            <pre id="melfa-create-response" class="border rounded p-2 bg-light mt-3" style="white-space: pre-wrap; overflow-y: auto; height: 200px;"></pre>
-            </div>
-        </div>
-        </div>
-    </div>
-    </div>
-
-
-    <!-- مربع كتابة أكواد MELFA BASIC -->
-    <div class="row g-4 mt-4">
-        <div class="col-lg-8"> 
+        <div class="col-lg-12">
             <div class="card shadow">
                 <div class="card-body">
-                    <h5 class="card-title" data-i18n="melfa_editor">✍️ MELFA BASIC IV Editörü</h5>
-                    <textarea id="melfa-code" class="form-control" rows="4" placeholder="......."></textarea>
-                    <button class="btn btn-primary mt-3" onclick="sendMelfaCode()">Kod yürütme</button>
+                    <h5 class="card-title" data-i18n="program_manager">İleri Seviye Program Yönetimi</h5>
+                    <div class="d-flex flex-wrap gap-2 mb-3 align-items-center">
+                        <button class="btn btn-outline-dark btn-sm" onclick="fetchPrograms('PRGRD')" data-i18n="prgrd_read">Program Oku (PRGRD)</button>
+                        <button class="btn btn-outline-primary btn-sm" onclick="fetchPrograms('PRGUP')" data-i18n="prgup_list">Programları Gör (PRGUP)</button>
+                        <div class="input-group" style="max-width: 300px;">
+                            <input type="text" class="form-control form-control-sm" id="load-program-id" data-i18n-placeholder="example_id" placeholder="Örnek: 333">
+                            <button class="btn btn-outline-secondary btn-sm" onclick="fetchPrograms('LOAD')" data-i18n="prgload_load">Program Yükle (PRGLOAD)</button>
+                        </div>
+                        <button class="btn btn-outline-warning btn-sm" onclick="fetchPrograms('SLOTINIT')" data-i18n="slotinit">Program Başlat (SLOTINIT)</button>
+                    </div>
+                    <label class="form-label" data-i18n="available_programs">Mevcut Programlar:</label>
+                    <textarea class="form-control mb-3" id="program-list" rows="2" readonly style="white-space: pre-wrap;"></textarea>
+                    <label class="form-label" data-i18n="run_program_name">Program Adı:</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="program-name" data-i18n-placeholder="example_program" placeholder="Örnek: test">
+                        <button class="btn btn-success" onclick="runProgram()" data-i18n="run">Çalıştır</button>
+                        <button class="btn btn-warning" onclick="sendCommand('1;1;STOP')" data-i18n="stop">Durdur</button>
+                        <button class="btn btn-danger" onclick="resetProgram()" data-i18n="reset_program">Programı Sıfırla</button>
+                        <button class="btn btn-secondary" onclick="resetRobot()" data-i18n="reset">Reset</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CREATE NEW PROGRAM -->
+    <div class="row g-4 mt-4">
+        <div class="col-lg-12">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h5 class="card-title" data-i18n="create_program">Yeni MELFA Programı Oluştur</h5>
+                    <label class="form-label" data-i18n="program_name">Program Adı:</label>
+                    <div class="input-group">
+                        <input type="text" id="new-program-name" class="form-control" data-i18n-placeholder="example_program" placeholder="Örnek: program1">
+                        <button class="btn btn-outline-success" onclick="createNewProgram()" data-i18n="load">Yükle (LOAD)</button>
+                        <button class="btn btn-outline-primary" onclick="listProgramSlots()" data-i18n="list_slots">Slotları Listele (LISTL)</button>
+                        <button class="btn btn-outline-success" onclick="saveProgram()" data-i18n="save_program">Kaydet (SAVE)</button>
+                        <button class="btn btn-outline-info" onclick="sendListP('-1')" data-i18n="listp_prev">Önceki Konum (LISTP -)</button>
+                        <button class="btn btn-outline-info" onclick="sendListP('+1')" data-i18n="listp_next">Sonraki Konum (LISTP +)</button>
+                    </div>
+                    <div class="mb-3">
+                        <pre id="melfa-create-response" class="border rounded p-2 bg-light mt-3" style="white-space: pre-wrap; overflow-y: auto; height: 200px;"></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MELFA BASIC CODE EDITOR -->
+    <div class="row g-4 mt-4">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h5 class="card-title" data-i18n="melfa_editor">MELFA BASIC IV Editörü</h5>
+                    <textarea id="melfa-code" class="form-control" rows="4" data-i18n-placeholder="code_placeholder" placeholder="..."></textarea>
+                    <button class="btn btn-primary mt-3" onclick="sendMelfaCode()" data-i18n="run_code">Kodu Çalıştır</button>
                 </div>
             </div>
         </div>
 
-        <!-- اختيار السرعة -->
+        <!-- SPEED SELECT -->
         <div class="col-lg-4">
             <div class="col-lg-12">
                 <div class="card shadow">
                     <div class="card-body">
-                        <h5 class="card-title" data-i18n="speed_select">Hız Seçimi </h5>
+                        <h5 class="card-title" data-i18n="speed_select">Hız Seçimi</h5>
                         <select id="speed-select" class="form-select">
                             <option value="10" data-i18n="speed_slow_10">Çok Yavaş (10%)</option>
                             <option value="20" data-i18n="speed_slow_20">Yavaş Hareket (20%)</option>
                             <option value="50" data-i18n="speed_medium_50">Orta Hız (50%)</option>
-                            <option value="75" data-i18n="speed_medium_75">Hızlı Tepki(75%)</option>
+                            <option value="75" data-i18n="speed_medium_75">Hızlı Tepki (75%)</option>
                             <option value="100" data-i18n="speed_fast_100">Maksimum Hız (100%)</option>
                         </select>
                     </div>
@@ -192,117 +161,81 @@
             </div>
         </div>
     </div>
-    <!-- أزرار الحركة -->
-      <div class="row g-4 mt-6">
-        <div class="col-lg-8"> 
+
+    <!-- MOVEMENT CONTROL -->
+    <div class="row g-4 mt-6">
+        <div class="col-lg-8">
             <div class="card shadow">
                 <div class="card-body">
                     <div class="row g-5 text-center mt-8">
-                        <h5 class="card-title mb-2" data-i18n="movement">Hareket Kontrolü / Movement Control</h5>
-
-                        <div class="col-4">
-                            <button class="btn btn-outline-primary move-btn" onmousedown="startMove('JOG00;00;01;00;00')" onmouseup="stopMove()" onmouseleave="stopMove()">➡️ Sağ</button>
-                        </div>
-                        <div class="col-4">
-                            <button class="btn btn-outline-primary move-btn" onmousedown="startMove('JOG00;00;02;00;00')" onmouseup="stopMove()" onmouseleave="stopMove()">🔼 Yukarı</button>
-                        </div>
-                        <div class="col-4">
-                            <button class="btn btn-outline-primary move-btn" onmousedown="startMove('JOG00;00;00;01;00')" onmouseup="stopMove()" onmouseleave="stopMove()">⬅️ Sol</button>
-                        </div>
-                        <div class="col-4">
-                            <button class="btn btn-outline-primary move-btn" onmousedown="startMove('JOG00;00;04;00;00')" onmouseup="stopMove()" onmouseleave="stopMove()">⬆️ Geri</button>
-                        </div>
-                        <div class="col-4">
-                            <button class="btn btn-outline-success move-btn" onmousedown="startMove('JOG00;00;00;02;00')" onmouseup="stopMove()" onmouseleave="stopMove()">🔽 Aşağı</button>
-                        </div>
-                        <div class="col-4">
-                            <button class="btn btn-outline-success move-btn" onmousedown="startMove('JOG00;00;00;04;00')" onmouseup="stopMove()" onmouseleave="stopMove()">⬇️ İleri</button>
-                        </div>
-                        <div class="col-4">
-                            <button class="btn btn-outline-warning move-btn" onmousedown="startMove('JOG00;00;10;00;00')" onmouseup="stopMove()" onmouseleave="stopMove()">🔼 Baş Yukarı</button>
-                        </div>
-                        <div class="col-4">
-                            <button class="btn btn-outline-warning move-btn" onmousedown="startMove('JOG00;00;00;10;00')" onmouseup="stopMove()" onmouseleave="stopMove()">🔽 Baş  Aşağı</button>
-                        </div>
-                        <div class="col-4">
-                            <button class="btn btn-outline-warning move-btn" onmousedown="startMove('JOG00;00;00;20;00')" onmouseup="stopMove()" onmouseleave="stopMove()">↻ Baş Sağ</button>
-                        </div>
-                        <div class="col-4">
-                            <button class="btn btn-outline-warning move-btn" onmousedown="startMove('JOG00;00;20;00;00')" onmouseup="stopMove()" onmouseleave="stopMove()">↺ Baş Sol</button>
-                        </div>
-                        <div class="col-4">
-                            <button class="btn btn-outline-danger move-btn" onmousedown="startMove('HNDON1')" onmouseup="stopMove()" onmouseleave="stopMove()">🤖 Aç Kıskaç</button>
-                        </div>
-                        <div class="col-4">
-                            <button class="btn btn-outline-danger move-btn" onmousedown="startMove('HNDOFF1')" onmouseup="stopMove()" onmouseleave="stopMove()">🤖 Kapat Kıskaç</button>
-                        </div>
+                        <h5 class="card-title mb-2" data-i18n="movement">Hareket Kontrolü</h5>
+                        <div class="col-4"><button class="btn btn-outline-primary move-btn" onmousedown="startMove('JOG00;00;01;00;00')" onmouseup="stopMove()" onmouseleave="stopMove()" data-i18n="move_right">Sağ</button></div>
+                        <div class="col-4"><button class="btn btn-outline-primary move-btn" onmousedown="startMove('JOG00;00;02;00;00')" onmouseup="stopMove()" onmouseleave="stopMove()" data-i18n="move_up">Yukarı</button></div>
+                        <div class="col-4"><button class="btn btn-outline-primary move-btn" onmousedown="startMove('JOG00;00;00;01;00')" onmouseup="stopMove()" onmouseleave="stopMove()" data-i18n="move_left">Sol</button></div>
+                        <div class="col-4"><button class="btn btn-outline-primary move-btn" onmousedown="startMove('JOG00;00;04;00;00')" onmouseup="stopMove()" onmouseleave="stopMove()" data-i18n="move_back">Geri</button></div>
+                        <div class="col-4"><button class="btn btn-outline-success move-btn" onmousedown="startMove('JOG00;00;00;02;00')" onmouseup="stopMove()" onmouseleave="stopMove()" data-i18n="move_down">Aşağı</button></div>
+                        <div class="col-4"><button class="btn btn-outline-success move-btn" onmousedown="startMove('JOG00;00;00;04;00')" onmouseup="stopMove()" onmouseleave="stopMove()" data-i18n="move_forward">İleri</button></div>
+                        <div class="col-4"><button class="btn btn-outline-warning move-btn" onmousedown="startMove('JOG00;00;10;00;00')" onmouseup="stopMove()" onmouseleave="stopMove()" data-i18n="move_head_up">Baş Yukarı</button></div>
+                        <div class="col-4"><button class="btn btn-outline-warning move-btn" onmousedown="startMove('JOG00;00;00;10;00')" onmouseup="stopMove()" onmouseleave="stopMove()" data-i18n="move_head_down">Baş Aşağı</button></div>
+                        <div class="col-4"><button class="btn btn-outline-warning move-btn" onmousedown="startMove('JOG00;00;00;20;00')" onmouseup="stopMove()" onmouseleave="stopMove()" data-i18n="move_head_right">Baş Sağ</button></div>
+                        <div class="col-4"><button class="btn btn-outline-warning move-btn" onmousedown="startMove('JOG00;00;20;00;00')" onmouseup="stopMove()" onmouseleave="stopMove()" data-i18n="move_head_left">Baş Sol</button></div>
+                        <div class="col-4"><button class="btn btn-outline-danger move-btn" onmousedown="startMove('HNDON1')" onmouseup="stopMove()" onmouseleave="stopMove()" data-i18n="open_gripper">Aç Kıskaç</button></div>
+                        <div class="col-4"><button class="btn btn-outline-danger move-btn" onmousedown="startMove('HNDOFF1')" onmouseup="stopMove()" onmouseleave="stopMove()" data-i18n="close_gripper">Kapat Kıskaç</button></div>
                     </div>
-             </div> 
+                </div>
+            </div>
         </div>
     </div>
-    
-        <!-- عرض الإحداثيات 📌 -->
+
+    <!-- COORDINATES CONTROL -->
     <div class="row g-4 mt-4">
         <div class="col-lg-12">
             <div class="card shadow">
                 <div class="card-body">
-                    <h5 class="card-title" data-i18n="coordinates">📌 Koordinatlar:</h5>
+                    <h5 class="card-title" data-i18n="coordinates">Koordinatlar:</h5>
                     <div class="input-group">
-                        <button class="btn btn-outline-primary mb-3" onclick="readCoordinates()">📍 قراءة الإحداثيات</button>
-                        <button class="btn btn-outline-primary mb-3" onclick="sendListP('-1')">📜 LISTP - السابق</button>
-                        <button class="btn btn-outline-primary mb-3" onclick="sendListP('+1')">📜 LISTP + التالي</button>
+                        <button class="btn btn-outline-primary mb-3" onclick="readCoordinates()" data-i18n="read_coordinates_btn">Koordinatları Oku</button>
+                        <button class="btn btn-outline-primary mb-3" onclick="sendListP('-1')" data-i18n="listp_prev">Önceki Konum</button>
+                        <button class="btn btn-outline-primary mb-3" onclick="sendListP('+1')" data-i18n="listp_next">Sonraki Konum</button>
                         <pre id="coordinates-display" class="border rounded p-2 bg-light"></pre>
-
                     </div>
                     <div class="input-group">
-                        <input class="form-control" id="coord-waist" placeholder="X" type="number">
-                        <input class="form-control" id="coord-shoulder" placeholder="Y" type="number">
-                        <input class="form-control" id="coord-elbow" placeholder="Z" type="number">
-                        <input class="form-control" id="coord-pitch" placeholder="A" type="number">
-                        <input class="form-control" id="coord-roll" placeholder="B" type="number">
-                        <input class="form-control" id="coord-c" placeholder="c" type="number">
-
+                        <input class="form-control" id="coord-waist" data-i18n-placeholder="waist_x" placeholder="X">
+                        <input class="form-control" id="coord-shoulder" data-i18n-placeholder="shoulder_y" placeholder="Y">
+                        <input class="form-control" id="coord-elbow" data-i18n-placeholder="elbow_z" placeholder="Z">
+                        <input class="form-control" id="coord-pitch" data-i18n-placeholder="pitch_a" placeholder="A">
+                        <input class="form-control" id="coord-roll" data-i18n-placeholder="roll_b" placeholder="B">
+                        <input class="form-control" id="coord-c" data-i18n-placeholder="c_axis" placeholder="C">
                     </div>
                 </div>
             </div>
         </div>
-
 
         <div class="d-flex gap-2 mb-4">
             <div class="d-flex gap-2 mt-3">
-                    <button class="btn btn-success btn-lg px-4" onclick="sendMixedMove('ABS')">
-                        🚀 تحريك مطلق (PCOSIROP)
-                    </button>
-                    <button class="btn btn-warning btn-lg px-4" onclick="sendMixedMove('REL')">
-                        🎯 تحريك نسبي (JCOSIROP)
-                    </button>
-                    <button class="btn btn-outline-success" onclick="resetArmAlarm()">إعادة ضبط الإنذار</button>
-                </div>
-        </div>
-    </div>
-
-   <!-- كرت إرسال كود صغير واستقبال الرد -->
-    <div class="row g-4 mt-4">
-    <div class="col-lg-12">
-        <div class="card shadow">
-        <div class="card-body">
-            <h5 class="card-title">📤 إرسال كود صغير واستقبال الرد</h5>
-
-            <!-- إدخال الكود وزر الإرسال -->
-            <div class="input-group mb-3">
-            <input type="text" class="form-control" id="custom-code-input" placeholder="مثال: 1;1;STATE">
-            <button class="btn btn-primary" onclick="sendCustomCode()">إرسال</button>
+                <button class="btn btn-success btn-lg px-4" onclick="sendMixedMove('ABS')" data-i18n="move_absolute">Mutlak Hareket (PCOSIROP)</button>
+                <button class="btn btn-warning btn-lg px-4" onclick="sendMixedMove('REL')" data-i18n="move_relative">Göreli Hareket (JCOSIROP)</button>
+                <button class="btn btn-outline-success" onclick="resetArmAlarm()" data-i18n="reset_alarm">Alarmı Sıfırla</button>
             </div>
-
-            <!-- عرض الرد -->
-            <label class="form-label">📥 الرد:</label>
-            <pre id="custom-code-response" class="form-control bg-light" style="height: 150px; overflow-y: auto;"></pre>
-        </div>
         </div>
     </div>
+
+    <!-- SEND CUSTOM CODE -->
+    <div class="row g-4 mt-4">
+        <div class="col-lg-12">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h5 class="card-title" data-i18n="send_custom_code">Özel Kod Gönder & Yanıt Al</h5>
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control" id="custom-code-input" data-i18n-placeholder="example_code" placeholder="Örnek: 1;1;STATE">
+                        <button class="btn btn-primary" onclick="sendCustomCode()" data-i18n="send">Gönder</button>
+                    </div>
+                    <label class="form-label" data-i18n="response">Yanıt:</label>
+                    <pre id="custom-code-response" class="form-control bg-light" style="height: 150px; overflow-y: auto;"></pre>
+                </div>
+            </div>
+        </div>
     </div>
-
-
 </div>
 
 <script src="{{ url_for('static', filename='js/main.js') }}"></script>
